@@ -1,0 +1,45 @@
+---
+name: "Copilot Setup Steps"
+
+"on": workflow_dispatch
+
+# Least privilege: this workflow only provisions a build environment.
+permissions:
+  contents: read
+
+jobs:
+  copilot-setup-steps:
+    name: Copilot coding agent environment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+
+      - name: Install Rust toolchain
+        # master
+        uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9
+        with:
+          toolchain: stable
+          components: clippy, rustfmt
+
+      - name: Cache cargo registry
+        # v5.0.3
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-copilot-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-copilot-
+
+      - name: Install cargo-deny
+        # v2.67.25
+        uses: taiki-e/install-action@15449e3094499af05d8d964a1c884208e4b8b595
+        with:
+          tool: cargo-deny
+
+      - name: Fetch dependencies
+        run: cargo fetch

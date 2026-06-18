@@ -1,0 +1,96 @@
+---
+name: Docker
+
+"on":
+  workflow_call:
+    inputs:
+      push:
+        description: "Push image to registry"
+        type: boolean
+        default: false
+    outputs:
+      image-digest:
+        description: >-
+          Manifest digest of the pushed image (sha256:...);
+          empty when push is false
+        value: >-
+          ${{ jobs.build-and-push.outputs.image-digest }}
+  workflow_dispatch:
+    inputs:
+      push:
+        description: "Push image to registry"
+        type: boolean
+        default: false
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+# Least privilege: read-all at the top; the build-and-push job is granted
+# packages:write only because it pushes the image to GHCR (when push=true).
+permissions:
+  contents: read
+
+jobs:
+  build-and-push:
+    name: Build and Push Docker Image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image-digest: ${{ steps.build.outputs.digest }}
+    steps:
+      - name: Checkout repository
+        # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+
+      # Login must precede Buildx setup so the BuildKit builder image
+      # is pulled with credentials, not anonymously.
+      - name: Log in to Container Registry
+        if: inputs.push
+        # v3.4.0
+        uses: >-
+          docker/login-action@3227f5311cb93ffd14d13e65d8cc400d30f4dd8a
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        # v3.9.0
+        uses: >-
+          docker/setup-buildx-action@7c525be6cc8a882d5163ce04293cac18617c709f
+
+      - name: Extract metadata
+        id: meta
+        # v6.0.0
+        uses: >-
+          docker/metadata-action@80c7e94dd9b9319bd5eb7a0e0fe9291e23a2a2e9
+        with:
+          images: >-
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push Docker image
+        id: build
+        # v6.10.0
+        uses: >-
+          docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: ${{ inputs.push }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            RUST_VERSION=1.92

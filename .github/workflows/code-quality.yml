@@ -1,0 +1,78 @@
+---
+name: Code Quality Metrics
+
+"on":
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  metrics:
+    name: Collect Code Quality Metrics
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+
+      - name: Install Rust toolchain
+        # master
+        uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9
+        with:
+          toolchain: stable
+
+      - name: Install analysis tools
+        # v2.67.18
+        uses: taiki-e/install-action@15449e3094499af05d8d964a1c884208e4b8b595
+        with:
+          tool: cargo-geiger,cargo-bloat
+
+      - name: Cache cargo registry
+        # v5.0.3
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-metrics-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-metrics-
+
+      - name: Scan for unsafe code
+        run: |
+          echo "## Unsafe Code Analysis" > metrics-report.md
+          echo '```' >> metrics-report.md
+          cargo geiger --all-features >> metrics-report.md || true
+          echo '```' >> metrics-report.md
+          echo "" >> metrics-report.md
+
+      - name: Analyze binary size
+        run: |
+          cargo build --release
+          # shellcheck disable=SC2129
+          {
+            echo "## Binary Size Analysis"
+            echo '```'
+            cargo bloat --release --crates
+            echo '```'
+            echo ""
+          } >> metrics-report.md
+
+      - name: Check documentation coverage
+        run: |
+          echo "## Documentation Coverage" >> metrics-report.md
+          echo '```' >> metrics-report.md
+          cargo doc --no-deps --all-features 2>&1 | grep -E "Documenting|warning" >> metrics-report.md || true
+          echo '```' >> metrics-report.md
+
+      - name: Upload metrics report
+        # v4.6.2
+        uses: actions/upload-artifact@47309c993abb98030a35d55ef7ff34b7fa1074b5
+        with:
+          name: code-quality-metrics
+          path: metrics-report.md
+          retention-days: 30
