@@ -331,7 +331,7 @@ jobs:
       pull-requests: write   # reusable's (skipped) dependency-review job declares it
     # attested-delivery/.github main @ 77a87549 (merged 2026-06-16)
     uses: >-
-      attested-delivery/.github/.github/workflows/reusable-sca-osv.yml@f7bee203c7a98bf6da29d4eda7c399978d7601ac
+      attested-delivery/.github/.github/workflows/reusable-sca-osv.yml@aba1860be6b6ebd5c0c0a0f07160946fb0349965
     with:
       fail-on-severity: high
       scan-args: |-
@@ -347,7 +347,7 @@ jobs:
       packages: read   # reusable's (skipped) image job declares it
     # attested-delivery/.github main @ 77a87549 (merged 2026-06-16)
     uses: >-
-      attested-delivery/.github/.github/workflows/reusable-trivy.yml@f7bee203c7a98bf6da29d4eda7c399978d7601ac
+      attested-delivery/.github/.github/workflows/reusable-trivy.yml@aba1860be6b6ebd5c0c0a0f07160946fb0349965
     with:
       scan-iac: true
 
@@ -360,7 +360,7 @@ jobs:
       contents: read
     # attested-delivery/.github main @ 77a87549 (merged 2026-06-16)
     uses: >-
-      attested-delivery/.github/.github/workflows/reusable-attest-scan.yml@f7bee203c7a98bf6da29d4eda7c399978d7601ac
+      attested-delivery/.github/.github/workflows/reusable-attest-scan.yml@aba1860be6b6ebd5c0c0a0f07160946fb0349965
     with:
       subject-name: ${{ needs.source.outputs.subject-name }}
       subject-digest: ${{ needs.source.outputs.subject-digest }}
@@ -377,7 +377,7 @@ jobs:
       contents: read
     # attested-delivery/.github main @ 77a87549 (merged 2026-06-16)
     uses: >-
-      attested-delivery/.github/.github/workflows/reusable-attest-scan.yml@f7bee203c7a98bf6da29d4eda7c399978d7601ac
+      attested-delivery/.github/.github/workflows/reusable-attest-scan.yml@aba1860be6b6ebd5c0c0a0f07160946fb0349965
     with:
       subject-name: ${{ needs.source.outputs.subject-name }}
       subject-digest: ${{ needs.source.outputs.subject-digest }}
