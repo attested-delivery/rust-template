@@ -243,7 +243,7 @@ jobs:
       - name: Install cargo-audit
         # v2.67.25
         uses: >-
-          taiki-e/install-action@b8cecb83565409bcc297b2df6e77f030b2a468d5
+          taiki-e/install-action@15449e3094499af05d8d964a1c884208e4b8b595
         with:
           tool: cargo-audit
 
@@ -331,7 +331,7 @@ jobs:
       pull-requests: write   # reusable's (skipped) dependency-review job declares it
     # attested-delivery/.github main @ 77a87549 (merged 2026-06-16)
     uses: >-
-      attested-delivery/.github/.github/workflows/reusable-sca-osv.yml@77a87549a65c6c978a0e87efe0168ed3517f7ca4
+      attested-delivery/.github/.github/workflows/reusable-sca-osv.yml@94e7410b9fad3498a1e507807900edbd2269ef81
     with:
       fail-on-severity: high
       scan-args: |-
@@ -347,7 +347,7 @@ jobs:
       packages: read   # reusable's (skipped) image job declares it
     # attested-delivery/.github main @ 77a87549 (merged 2026-06-16)
     uses: >-
-      attested-delivery/.github/.github/workflows/reusable-trivy.yml@77a87549a65c6c978a0e87efe0168ed3517f7ca4
+      attested-delivery/.github/.github/workflows/reusable-trivy.yml@94e7410b9fad3498a1e507807900edbd2269ef81
     with:
       scan-iac: true
 
@@ -360,7 +360,7 @@ jobs:
       contents: read
     # attested-delivery/.github main @ 77a87549 (merged 2026-06-16)
     uses: >-
-      attested-delivery/.github/.github/workflows/reusable-attest-scan.yml@740cb8efb57af0187f88e9b4f939355b871a5895
+      attested-delivery/.github/.github/workflows/reusable-attest-scan.yml@94e7410b9fad3498a1e507807900edbd2269ef81
     with:
       subject-name: ${{ needs.source.outputs.subject-name }}
       subject-digest: ${{ needs.source.outputs.subject-digest }}
@@ -377,7 +377,7 @@ jobs:
       contents: read
     # attested-delivery/.github main @ 77a87549 (merged 2026-06-16)
     uses: >-
-      attested-delivery/.github/.github/workflows/reusable-attest-scan.yml@740cb8efb57af0187f88e9b4f939355b871a5895
+      attested-delivery/.github/.github/workflows/reusable-attest-scan.yml@94e7410b9fad3498a1e507807900edbd2269ef81
     with:
       subject-name: ${{ needs.source.outputs.subject-name }}
       subject-digest: ${{ needs.source.outputs.subject-digest }}
