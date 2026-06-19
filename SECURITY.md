@@ -114,6 +114,36 @@ gh attestation verify rust_template-<X.Y.Z>-linux-amd64 \
 shasum -a 256 -c rust_template-<X.Y.Z>-checksums.txt
 ```
 
+### Gate-verdict attestations (seam-signed)
+
+The SAST (CodeQL), SCA (OSV), and IaC/license (Trivy) verdicts are signed over
+the published source snapshot, and the container-scan (Trivy image) verdict over
+the image digest, by the central attestation seam `reusable-attest-scan.yml`.
+Under SLSA Build L3 the signer identity is that central workflow — so
+`--signer-workflow` is **required** and `--owner`/`--repo` alone is
+insufficient. Verify one signer/predicate per command:
+
+```bash
+# SAST (CodeQL), SCA (OSV), IaC/license (Trivy) verdicts over the source snapshot.
+# gh release download v<X.Y.Z> --repo attested-delivery/rust-template first.
+SUBJECT=rust_template-<X.Y.Z>-source.tar.gz
+for PT in sast sca iac-license; do
+  gh attestation verify "$SUBJECT" --owner attested-delivery \
+    --signer-workflow attested-delivery/.github/.github/workflows/reusable-attest-scan.yml \
+    --predicate-type "https://attested-delivery.github.io/attestations/${PT}/v1"
+done
+
+# Container-scan (Trivy image) verdict over the image digest.
+gh attestation verify "oci://ghcr.io/attested-delivery/rust-template@${DIGEST}" \
+  --owner attested-delivery \
+  --signer-workflow attested-delivery/.github/.github/workflows/reusable-attest-scan.yml \
+  --predicate-type https://attested-delivery.github.io/attestations/container-scan/v1
+```
+
+A passing verification proves the gate **ran and recorded a verdict** bound to
+the subject digest; read the predicate body for the verdict itself (signed ≠
+passed).
+
 ### Published crate
 
 The `.crate` archive served by crates.io is downloaded back from the

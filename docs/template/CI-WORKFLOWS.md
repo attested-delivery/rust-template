@@ -257,6 +257,14 @@ supersedes the former standalone `codeql-analysis.yml`.
 
 **Trigger:** Push to `main`, pull request to `main`, weekly schedule, manual.
 
+**Artifact verdicts are signed and attested at release.**
+Every gate verdict that characterizes the shipped artifact — SAST (CodeQL), SCA
+(OSV), IaC/license (Trivy), container-scan (Trivy image), and DAST (ZAP) — is
+signed and attested at release, bound to the release subject by digest. SAST
+analyzes the exact source that ships, so its verdict travels with the release
+like the others. Supply-chain posture (Scorecard) is a repo-level signal, not an
+artifact verdict.
+
 ### secrets-scan.yml
 
 **What it does:** Scans the repository history for accidentally committed
