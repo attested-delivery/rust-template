@@ -2,11 +2,11 @@
 name: Release
 
 # Attested delivery: build platform binaries, attach SLSA build provenance
-# to each, generate + attest a CycloneDX SBOM, attest the SCA + IaC/license
-# quality-gate verdicts over a published source snapshot, then fail-closed
-# verify every attestation BEFORE the GitHub Release is published. A tag
-# publishes nothing unattested. (SAST and supply-chain posture are enforced
-# at merge time in quality-gates.yml; they are not re-run here.)
+# to each, generate + attest a CycloneDX SBOM, attest the SAST + SCA +
+# IaC/license quality-gate verdicts over a published source snapshot, then
+# fail-closed verify every attestation BEFORE the GitHub Release is published.
+# A tag publishes nothing unattested. (Supply-chain posture (Scorecard) is a
+# repo-level signal in quality-gates.yml, not an artifact verdict.)
 #
 # Project specificity is resolved at runtime from Cargo.toml (crate name,
 # binary name, version) and the GitHub context (owner/repo) — there is
@@ -314,13 +314,32 @@ jobs:
           if-no-files-found: error
 
   # ---------------------------------------------------------------------------
-  # Quality-gate attestation seam — SCA (OSV) and IaC/license (Trivy) verdicts
-  # signed over the published source snapshot, then fail-closed verified in the
-  # `verify` job before release. These gates are fast and directly characterize
-  # the shipped source/dependencies; SAST (CodeQL) and posture (Scorecard) are
-  # repo/source-level and enforced at merge in quality-gates.yml, so they are
-  # NOT re-run here.
+  # Quality-gate attestation seam — SAST (CodeQL), SCA (OSV), and IaC/license
+  # (Trivy) verdicts signed over the published source snapshot, then fail-closed
+  # verified in the `verify` job before release.
+  #
+  # Every gate verdict that characterizes the shipped artifact — SAST (CodeQL),
+  # SCA (OSV), IaC/license (Trivy), container-scan (Trivy image), and DAST (ZAP)
+  # — is signed and attested at release, bound to the release subject by digest.
+  # SAST analyzes the exact source that ships, so its verdict travels with the
+  # release like the others. Supply-chain posture (Scorecard) is a repo-level
+  # signal, not an artifact verdict.
   # ---------------------------------------------------------------------------
+  gate-sast:
+    name: Gate — SAST (CodeQL)
+    needs: [meta]
+    permissions:
+      security-events: write
+      contents: read
+      actions: read
+      packages: read   # reusable's analyze job declares it (CodeQL pkg resolution)
+    # attested-delivery/.github main @ 77a87549 (merged 2026-06-16)
+    uses: >-
+      attested-delivery/.github/.github/workflows/reusable-sast-codeql.yml@aba1860be6b6ebd5c0c0a0f07160946fb0349965
+    with:
+      languages: rust
+      build-mode: none
+
   gate-sca:
     name: Gate — SCA (OSV)
     needs: [meta]
@@ -385,9 +404,26 @@ jobs:
       predicate-artifact: ${{ needs.gate-trivy.outputs.sarif-artifact }}
       predicate-filename: ${{ needs.gate-trivy.outputs.sarif-filename }}
 
+  attest-sast:
+    name: Attest — SAST
+    needs: [meta, source, gate-sast]
+    permissions:
+      id-token: write
+      attestations: write
+      contents: read
+    # attested-delivery/.github main @ 77a87549 (merged 2026-06-16)
+    uses: >-
+      attested-delivery/.github/.github/workflows/reusable-attest-scan.yml@aba1860be6b6ebd5c0c0a0f07160946fb0349965
+    with:
+      subject-name: ${{ needs.source.outputs.subject-name }}
+      subject-digest: ${{ needs.source.outputs.subject-digest }}
+      predicate-type: https://attested-delivery.github.io/attestations/sast/v1
+      predicate-artifact: ${{ needs.gate-sast.outputs.sarif-artifact }}
+      predicate-filename: ${{ needs.gate-sast.outputs.sarif-filename }}
+
   verify:
     name: Verify Attestations
-    needs: [meta, build, sbom, source, attest-sca, attest-iac-license]
+    needs: [meta, build, sbom, source, attest-sca, attest-iac-license, attest-sast]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -430,8 +466,9 @@ jobs:
               *-source.tar.gz)
                 # Source snapshot: provenance + the seam-signed gate verdicts.
                 echo "Verifying provenance: ${f}"
-                gh attestation verify "$f" --repo "$GITHUB_REPOSITORY"
-                for pt in sca iac-license; do
+                gh attestation verify "$f" --repo "$GITHUB_REPOSITORY" \
+                  --predicate-type https://slsa.dev/provenance/v1
+                for pt in sast sca iac-license; do
                   echo "Verifying gate (${pt}): ${f}"
                   gh attestation verify "$f" --owner "$OWNER" \
                     --signer-workflow "$SEAM" \
@@ -442,7 +479,8 @@ jobs:
               *)
                 # Platform binary: provenance + SBOM attestation.
                 echo "Verifying provenance: ${f}"
-                gh attestation verify "$f" --repo "$GITHUB_REPOSITORY"
+                gh attestation verify "$f" --repo "$GITHUB_REPOSITORY" \
+                  --predicate-type https://slsa.dev/provenance/v1
                 echo "Verifying SBOM attestation: ${f}"
                 gh attestation verify "$f" --repo "$GITHUB_REPOSITORY" \
                   --predicate-type https://cyclonedx.org/bom ;;
