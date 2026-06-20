@@ -53,7 +53,6 @@ Detailed reference material organized by topic.
 | Document | Description |
 |----------|-------------|
 | [Signed Releases](security/SIGNED-RELEASES.md) | Release signing and verification |
-| [Verified Fetches](reference/verified-fetches.md) | Pin + verify + fail-closed rules for any external tool fetch; integrity ladder and preinstalled-tool list |
 
 ### Distribution
 
@@ -95,15 +94,6 @@ Design rationale and trade-offs — the "why" behind the template.
 | Document | Description |
 |----------|-------------|
 | [Template Architecture](explanation/architecture.md) | Why `crates/` not `src/`, the CI orchestration model, the `publish = false` gate, attested delivery, lint philosophy, and library conventions |
-| [Why Verify Every External Fetch](explanation/verified-fetches.md) | The supply-chain threat model behind pin + verify + fail-closed, and why "prefer the runner" comes first |
-
-### How-to Guides
-
-Task-oriented procedures.
-
-| Document | Description |
-|----------|-------------|
-| [Add a Tool to a Workflow Safely](how-to/add-a-verified-tool.md) | Bring an external package, binary, or tool into a job without opening a supply-chain hole |
 
 ## Architectural Decision Records
 

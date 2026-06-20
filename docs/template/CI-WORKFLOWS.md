@@ -294,9 +294,10 @@ point). Order of preference:
    `cargo install --locked --version X`, `npm ci`, `pnpm install --frozen-lockfile`,
    `corepack`, `go install pkg@version` — never unpinned or `… || true`.
 
-The full ladder with a copy-pasteable example lives in
-`attested-delivery/attested-pipeline-template` → `SECURITY.md`
-("Trusted tool acquisition").
+The canonical, org-wide treatment — full ladder, preinstalled-tool list, and
+the threat model behind it — is the **Verify Every External Fetch** concept on
+the docs site:
+<https://attested-delivery.github.io/docs/concepts/11-verify-every-external-fetch/>.
 
 ---
 
