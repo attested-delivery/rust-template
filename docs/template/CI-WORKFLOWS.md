@@ -285,7 +285,7 @@ point). Order of preference:
    them directly, add no install step.
 2. **Else a SHA-pinned action** (`pin-check` enforces full 40-char SHAs).
 3. **Else download → verify → fail closed**, strongest mechanism first and never
-   below a checksum: `gh attestation verify` › `cosign verify`/`verify-blob`
+   below a checksum: `gh attestation verify` › `cosign verify`/`cosign verify-blob`
    (or `gpg`/`minisign`) › `sha256sum -c` of a **pinned digest**. Run under
    `set -euo pipefail`, verify before executing, pin the version; leave a
    `# TODO` on any checksum-only fallback to upgrade later.
