@@ -12,12 +12,14 @@ name: Release
 # binary name, version) and the GitHub context (owner/repo) — there is
 # nothing to rename in this file when the template is instantiated.
 #
-# Dry-run: `workflow_dispatch` from any branch rehearses the build, test,
-# SBOM-generation, and source-pack steps only. Persistent attestations and the
-# fail-closed verify are tag-gated (`refs/tags/*`), so a dry-run publishes
-# NOTHING — no signed provenance/SBOM/gate attestations enter the public store.
-# This keeps the build byte-reproducible without a dry-run's `-dev` artifacts
-# minting attestations that collide (same digest) with a later tagged release.
+# Dry-run: `workflow_dispatch` from any branch rehearses the non-publishing
+# pipeline — build, test, audit, SBOM generation, source-pack, and the
+# quality-gate scans (`gate-sast`/`gate-sca`/`gate-trivy`). Only the signing,
+# attestation, `verify`, and release-publish jobs are tag-gated (`refs/tags/*`),
+# so a dry-run publishes NOTHING — no signed provenance/SBOM/gate attestations
+# enter the public store. This keeps the build byte-reproducible without a
+# dry-run's `-dev` artifacts minting attestations that collide (same digest)
+# with a later tagged release.
 
 "on":
   push:
