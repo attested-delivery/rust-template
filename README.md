@@ -196,7 +196,7 @@ This template includes production-ready workflows:
 
 - **Release** (`.github/workflows/release.yml`) - Attested GitHub releases with multi-platform binaries
   - Builds for: Linux (`x86_64`, ARM64), macOS (`x86_64`, ARM64), Windows (`x86_64`)
-  - Artifacts named `{bin}-{version}-{platform}` (e.g. `rust_template-0.2.0-linux-amd64`)
+  - Artifacts named `{bin}-{version}-{platform}` (e.g. `rust_template-0.1.1-linux-amd64`)
   - SLSA build provenance and `CycloneDX` SBOM attestations on every binary
   - Fail-closed `gh attestation verify` gate runs before the release is published
   - Single `{bin}-{version}-checksums.txt` checksums file

@@ -39,7 +39,7 @@ Update version in `Cargo.toml`:
 
 ```toml
 [package]
-version = "0.2.0"  # Update this
+version = "0.1.1"  # Update this
 ```
 
 Run checks locally:
@@ -56,12 +56,12 @@ cargo deny check
 ```bash
 # Commit version bump
 git add Cargo.toml
-git commit -m "chore: bump version to 0.2.0"
+git commit -m "chore: bump version to 0.1.1"
 git push
 
 # Create annotated tag
-git tag -a v0.2.0 -m "Release v0.2.0"
-git push origin v0.2.0
+git tag -a v0.1.1 -m "Release v0.1.1"
+git push origin v0.1.1
 ```
 
 ### 3. Automated Workflows
@@ -201,13 +201,13 @@ Delete the release and tag:
 
 ```bash
 # Delete remote tag
-git push --delete origin v0.2.0
+git push --delete origin v0.1.1
 
 # Delete local tag
-git tag -d v0.2.0
+git tag -d v0.1.1
 
 # Delete release via GitHub UI or gh CLI
-gh release delete v0.2.0
+gh release delete v0.1.1
 ```
 
 ### Docker
@@ -224,14 +224,14 @@ docker pull ghcr.io/attested-delivery/rust-template:v0.1.0
 
 1. Yank the version (prevents new projects from using it):
    ```bash
-   cargo yank --vers 0.2.0
+   cargo yank --vers 0.1.1
    ```
 
 2. Publish a patch version with fixes:
    ```bash
-   # Update to 0.2.1
-   git tag -a v0.2.1 -m "Release v0.2.1 (fixes v0.2.0)"
-   git push origin v0.2.1
+   # Update to v0.1.2
+   git tag -a v0.1.2 -m "Release v0.1.2 (fixes v0.1.1)"
+   git push origin v0.1.2
    ```
 
 ## Monitoring
@@ -303,8 +303,8 @@ Dependabot automatically opens PRs for:
 
 3. **Version Bump in Separate Commit**
    ```bash
-   git commit -m "chore: bump version to 0.2.0"
-   git tag -a v0.2.0 -m "Release v0.2.0"
+   git commit -m "chore: bump version to 0.1.1"
+   git tag -a v0.1.1 -m "Release v0.1.1"
    ```
 
 4. **Monitor Release Progress**
