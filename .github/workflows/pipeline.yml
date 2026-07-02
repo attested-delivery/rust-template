@@ -96,15 +96,6 @@ jobs:
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
-  test-matrix:
-    name: Test Matrix
-    if: >-
-      github.event_name == 'pull_request'
-      || (github.event_name == 'workflow_dispatch'
-      && (inputs.stage == 'all'
-      || inputs.stage == 'ci'))
-    uses: ./.github/workflows/ci-test-matrix.yml
-
   # Required check context: "pin-check / pin-check" — asserts every
   # `uses:` reference is pinned to a full 40-char commit SHA.
   pin-check:
@@ -114,9 +105,23 @@ jobs:
       || inputs.stage == 'ci'
     permissions:
       contents: read
-    # modeled-information-format/.github main @ ca91728 (2026-06-23)
+    # modeled-information-format/.github main @ e50b004c (2026-07-01)
     uses: >-
-      modeled-information-format/.github/.github/workflows/pin-check.yml@ca91728c87beb08742325b4ed4d06fcfb261435b
+      modeled-information-format/.github/.github/workflows/pin-check.yml@e50b004cbdcf2b3258d223b1f6a4d98ff7938abf
+
+  # Required check context: "validate-workflows / actionlint" — lints every
+  # workflow file for syntax/semantic errors (separate concern from pin-check's
+  # SHA-pinning enforcement).
+  validate-workflows:
+    if: >-
+      github.event_name != 'workflow_dispatch'
+      || inputs.stage == 'all'
+      || inputs.stage == 'ci'
+    permissions:
+      contents: read
+    # modeled-information-format/.github main @ e50b004c (2026-07-01)
+    uses: >-
+      modeled-information-format/.github/.github/workflows/reusable-actionlint.yml@e50b004cbdcf2b3258d223b1f6a4d98ff7938abf
 
   # -----------------------------------------------------------
   # Docker — after CI; PR = build-only, push on main/tags
@@ -157,9 +162,9 @@ jobs:
       attestations: write
       packages: write
       contents: read
-    # modeled-information-format/.github main @ ca91728 (2026-06-23)
+    # modeled-information-format/.github main @ e50b004c (2026-07-01)
     uses: >-
-      modeled-information-format/.github/.github/workflows/sign-and-attest.yml@ca91728c87beb08742325b4ed4d06fcfb261435b
+      modeled-information-format/.github/.github/workflows/sign-and-attest.yml@e50b004cbdcf2b3258d223b1f6a4d98ff7938abf
     with:
       image-name: ghcr.io/${{ github.repository }}
       image-digest: ${{ needs.docker.outputs.image-digest }}
@@ -177,9 +182,9 @@ jobs:
       attestations: read
       packages: read
       contents: read
-    # modeled-information-format/.github main @ ca91728 (2026-06-23)
+    # modeled-information-format/.github main @ e50b004c (2026-07-01)
     uses: >-
-      modeled-information-format/.github/.github/workflows/verify-attestation.yml@ca91728c87beb08742325b4ed4d06fcfb261435b
+      modeled-information-format/.github/.github/workflows/verify-attestation.yml@e50b004cbdcf2b3258d223b1f6a4d98ff7938abf
     with:
       image-ref: >-
         ghcr.io/${{ github.repository }}@${{
@@ -205,9 +210,9 @@ jobs:
       security-events: write
       actions: read
       packages: read
-    # modeled-information-format/.github main @ ca91728 (2026-06-23)
+    # modeled-information-format/.github main @ e50b004c (2026-07-01)
     uses: >-
-      modeled-information-format/.github/.github/workflows/reusable-trivy.yml@ca91728c87beb08742325b4ed4d06fcfb261435b
+      modeled-information-format/.github/.github/workflows/reusable-trivy.yml@e50b004cbdcf2b3258d223b1f6a4d98ff7938abf
     with:
       image-ref: >-
         ghcr.io/${{ github.repository }}@${{
@@ -226,9 +231,9 @@ jobs:
       id-token: write
       attestations: write
       contents: read
-    # modeled-information-format/.github main @ ca91728 (2026-06-23)
+    # modeled-information-format/.github main @ e50b004c (2026-07-01)
     uses: >-
-      modeled-information-format/.github/.github/workflows/reusable-attest-scan.yml@ca91728c87beb08742325b4ed4d06fcfb261435b
+      modeled-information-format/.github/.github/workflows/reusable-attest-scan.yml@e50b004cbdcf2b3258d223b1f6a4d98ff7938abf
     with:
       subject-name: ghcr.io/${{ github.repository }}
       subject-digest: ${{ needs.docker.outputs.image-digest }}

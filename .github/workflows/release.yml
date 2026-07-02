@@ -347,9 +347,9 @@ jobs:
       contents: read
       actions: read
       packages: read   # reusable's analyze job declares it (CodeQL pkg resolution)
-    # modeled-information-format/.github main @ ca91728 (2026-06-23)
+    # modeled-information-format/.github main @ e50b004c (2026-07-01)
     uses: >-
-      modeled-information-format/.github/.github/workflows/reusable-sast-codeql.yml@ca91728c87beb08742325b4ed4d06fcfb261435b
+      modeled-information-format/.github/.github/workflows/reusable-sast-codeql.yml@e50b004cbdcf2b3258d223b1f6a4d98ff7938abf
     with:
       languages: rust
       build-mode: none
@@ -362,9 +362,9 @@ jobs:
       contents: read
       security-events: write
       pull-requests: write   # reusable's (skipped) dependency-review job declares it
-    # modeled-information-format/.github main @ ca91728 (2026-06-23)
+    # modeled-information-format/.github main @ e50b004c (2026-07-01)
     uses: >-
-      modeled-information-format/.github/.github/workflows/reusable-sca-osv.yml@ca91728c87beb08742325b4ed4d06fcfb261435b
+      modeled-information-format/.github/.github/workflows/reusable-sca-osv.yml@e50b004cbdcf2b3258d223b1f6a4d98ff7938abf
     with:
       fail-on-severity: high
       scan-args: |-
@@ -378,9 +378,9 @@ jobs:
       security-events: write
       actions: read
       packages: read   # reusable's (skipped) image job declares it
-    # modeled-information-format/.github main @ ca91728 (2026-06-23)
+    # modeled-information-format/.github main @ e50b004c (2026-07-01)
     uses: >-
-      modeled-information-format/.github/.github/workflows/reusable-trivy.yml@ca91728c87beb08742325b4ed4d06fcfb261435b
+      modeled-information-format/.github/.github/workflows/reusable-trivy.yml@e50b004cbdcf2b3258d223b1f6a4d98ff7938abf
     with:
       scan-iac: true
 
@@ -393,9 +393,9 @@ jobs:
       id-token: write
       attestations: write
       contents: read
-    # modeled-information-format/.github main @ ca91728 (2026-06-23)
+    # modeled-information-format/.github main @ e50b004c (2026-07-01)
     uses: >-
-      modeled-information-format/.github/.github/workflows/reusable-attest-scan.yml@ca91728c87beb08742325b4ed4d06fcfb261435b
+      modeled-information-format/.github/.github/workflows/reusable-attest-scan.yml@e50b004cbdcf2b3258d223b1f6a4d98ff7938abf
     with:
       subject-name: ${{ needs.source.outputs.subject-name }}
       subject-digest: ${{ needs.source.outputs.subject-digest }}
@@ -412,9 +412,9 @@ jobs:
       id-token: write
       attestations: write
       contents: read
-    # modeled-information-format/.github main @ ca91728 (2026-06-23)
+    # modeled-information-format/.github main @ e50b004c (2026-07-01)
     uses: >-
-      modeled-information-format/.github/.github/workflows/reusable-attest-scan.yml@ca91728c87beb08742325b4ed4d06fcfb261435b
+      modeled-information-format/.github/.github/workflows/reusable-attest-scan.yml@e50b004cbdcf2b3258d223b1f6a4d98ff7938abf
     with:
       subject-name: ${{ needs.source.outputs.subject-name }}
       subject-digest: ${{ needs.source.outputs.subject-digest }}
@@ -431,9 +431,9 @@ jobs:
       id-token: write
       attestations: write
       contents: read
-    # modeled-information-format/.github main @ ca91728 (2026-06-23)
+    # modeled-information-format/.github main @ e50b004c (2026-07-01)
     uses: >-
-      modeled-information-format/.github/.github/workflows/reusable-attest-scan.yml@ca91728c87beb08742325b4ed4d06fcfb261435b
+      modeled-information-format/.github/.github/workflows/reusable-attest-scan.yml@e50b004cbdcf2b3258d223b1f6a4d98ff7938abf
     with:
       subject-name: ${{ needs.source.outputs.subject-name }}
       subject-digest: ${{ needs.source.outputs.subject-digest }}
@@ -454,9 +454,9 @@ jobs:
       id-token: write
       attestations: write
       contents: read
-    # modeled-information-format/.github main @ ca91728 (2026-06-23)
+    # modeled-information-format/.github main @ e50b004c (2026-07-01)
     uses: >-
-      modeled-information-format/.github/.github/workflows/reusable-vex.yml@ca91728c87beb08742325b4ed4d06fcfb261435b
+      modeled-information-format/.github/.github/workflows/reusable-vex.yml@e50b004cbdcf2b3258d223b1f6a4d98ff7938abf
     with:
       subject-name: ${{ needs.source.outputs.subject-name }}
       subject-digest: ${{ needs.source.outputs.subject-digest }}
