@@ -169,4 +169,52 @@ mod tests {
         let reserialized = serde_json::to_value(&parsed).unwrap();
         assert_eq!(reserialized["herd_size"], serde_json::json!(42));
     }
+
+    #[test]
+    fn entity_reference_builder_sets_all_optional_fields() {
+        let reference = EntityReference::new("urn:mif:entity:person:jane-smith".to_string())
+            .with_entity_type(EntityType::Known(KnownEntityType::Person))
+            .with_name("Jane Smith".to_string())
+            .with_role("author".to_string());
+
+        assert_eq!(reference.r#type, "EntityReference");
+        assert_eq!(reference.entity.id, "urn:mif:entity:person:jane-smith");
+        assert_eq!(
+            reference.entity_type,
+            Some(EntityType::Known(KnownEntityType::Person))
+        );
+        assert_eq!(reference.name, Some("Jane Smith".to_string()));
+        assert_eq!(reference.role, Some("author".to_string()));
+    }
+
+    #[test]
+    fn entity_reference_new_has_no_optional_fields_set() {
+        let reference = EntityReference::new("urn:mif:entity:file:readme".to_string());
+        assert!(reference.entity_type.is_none());
+        assert!(reference.name.is_none());
+        assert!(reference.role.is_none());
+    }
+
+    #[test]
+    fn entity_data_new_has_no_optional_fields_or_extras() {
+        let data = EntityData::new("Jane Smith".to_string());
+        assert_eq!(data.name, "Jane Smith");
+        assert!(data.entity_type.is_none());
+        assert!(data.entity_id.is_none());
+        assert!(data.extra.is_empty());
+    }
+
+    #[test]
+    fn known_entity_type_covers_every_closed_variant() {
+        for (variant, label) in [
+            (KnownEntityType::Person, "Person"),
+            (KnownEntityType::Organization, "Organization"),
+            (KnownEntityType::Technology, "Technology"),
+            (KnownEntityType::Concept, "Concept"),
+            (KnownEntityType::File, "File"),
+        ] {
+            let json = serde_json::to_string(&variant).unwrap();
+            assert_eq!(json, format!("\"{label}\""));
+        }
+    }
 }

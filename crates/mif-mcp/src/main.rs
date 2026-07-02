@@ -90,3 +90,90 @@ async fn main() -> anyhow::Result<()> {
     service.waiting().await?;
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use std::fs;
+
+    use super::{Mif, Parameters, ResolveParams, ValidateParams};
+
+    fn write_temp_file(contents: &str) -> tempfile::NamedTempFile {
+        let file = tempfile::NamedTempFile::new().unwrap();
+        fs::write(file.path(), contents).unwrap();
+        file
+    }
+
+    #[test]
+    fn validate_tool_accepts_a_conformant_document() {
+        let file = write_temp_file(
+            r#"{
+                "@context": "https://mif-spec.dev/schema/context.jsonld",
+                "@type": "Concept",
+                "@id": "urn:mif:memory:test-001",
+                "conceptType": "semantic",
+                "content": "Test content.",
+                "created": "2026-07-02T00:00:00Z"
+            }"#,
+        );
+        let result = Mif.validate_mif_document(Parameters(ValidateParams {
+            file: file.path().to_path_buf(),
+        }));
+        assert!(result.ends_with(": valid"));
+    }
+
+    #[test]
+    fn validate_tool_reports_invalid_document() {
+        let file = write_temp_file(r#"{"content": "missing required fields"}"#);
+        let result = Mif.validate_mif_document(Parameters(ValidateParams {
+            file: file.path().to_path_buf(),
+        }));
+        assert!(result.contains("invalid"));
+    }
+
+    #[test]
+    fn validate_tool_reports_missing_file() {
+        let result = Mif.validate_mif_document(Parameters(ValidateParams {
+            file: "/nonexistent/mif-mcp-test-fixture.json".into(),
+        }));
+        assert!(result.contains("failed to read"));
+    }
+
+    #[test]
+    fn validate_tool_reports_invalid_json() {
+        let file = write_temp_file("not json");
+        let result = Mif.validate_mif_document(Parameters(ValidateParams {
+            file: file.path().to_path_buf(),
+        }));
+        assert!(result.contains("failed to parse"));
+    }
+
+    #[test]
+    fn resolve_tool_returns_the_extends_chain() {
+        let dir = tempfile::tempdir().unwrap();
+        fs::write(
+            dir.path().join("mif-base.yaml"),
+            "ontology:\n  id: mif-base\n  version: 1.0.0\n",
+        )
+        .unwrap();
+        fs::write(
+            dir.path().join("domain.yaml"),
+            "ontology:\n  id: domain\n  version: 1.0.0\n  extends: [mif-base]\n",
+        )
+        .unwrap();
+        let result = Mif.resolve_ontology_reference(Parameters(ResolveParams {
+            id: "domain".to_string(),
+            ontologies_dir: dir.path().to_path_buf(),
+        }));
+        assert_eq!(result, "mif-base (1.0.0) -> domain (1.0.0)");
+    }
+
+    #[test]
+    fn resolve_tool_reports_unknown_ontology() {
+        let dir = tempfile::tempdir().unwrap();
+        let result = Mif.resolve_ontology_reference(Parameters(ResolveParams {
+            id: "missing".to_string(),
+            ontologies_dir: dir.path().to_path_buf(),
+        }));
+        assert!(result.contains("not found"));
+    }
+}

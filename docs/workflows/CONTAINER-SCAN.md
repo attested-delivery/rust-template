@@ -1,42 +1,126 @@
 ---
-diataxis_type: how-to
+id: reference-container-scan-workflow
+type: semantic
+created: '2026-07-02T00:00:00Z'
+modified: '2026-07-02T00:00:00Z'
+namespace: reference/workflows
+title: Container vulnerability scanning (Trivy) — GitHub Actions workflow reference
+tags:
+  - reference
+  - ci
+  - workflow
+  - trivy
+  - container
+temporal:
+  '@type': TemporalMetadata
+  validFrom: '2026-07-02T00:00:00Z'
+  recordedAt: '2026-07-02T00:00:00Z'
+  ttl: P1Y
+provenance:
+  '@type': Provenance
+  sourceType: system_generated
+  trustLevel: verified
+  wasDerivedFrom:
+    '@id': https://github.com/modeled-information-format/mif-rs/blob/main/.github/workflows/quality-gates.yml
+    '@type': prov:Entity
+citations:
+  - '@type': Citation
+    citationType: tool
+    citationRole: source
+    title: Trivy
+    url: https://aquasecurity.github.io/trivy/
+  - '@type': Citation
+    citationType: specification
+    citationRole: methodology
+    title: Diátaxis — Reference
+    url: https://diataxis.fr/reference/
+    accessed: '2026-07-02'
+ontology:
+  '@type': OntologyReference
+  id: mif-docs
+  version: 1.0.0
+  uri: https://mif-spec.dev/ontologies/mif-docs
+entity:
+  name: Container vulnerability scanning (Trivy)
+  entity_type: reference-document
 ---
-# Container Vulnerability Scanning with Trivy
 
-Automated Docker container vulnerability scanning using [Trivy](https://github.com/aquasecurity/trivy), with findings surfaced in the GitHub Security tab.
+# Container vulnerability scanning (Trivy)
 
-## Reference
+Trivy scanning in this repo has no dedicated workflow file. It runs through
+the central reusable `reusable-trivy.yml` (from
+`modeled-information-format/.github`), called from two jobs in two different
+caller workflows, plus one attestation job.
 
-Trivy runs via the central reusable `reusable-trivy.yml` (from `modeled-information-format/.github`), invoked from two callers:
+## Callers
 
-| Field | Value |
-|---|---|
-| Filesystem scan | `quality-gates.yml` (job `trivy`) — IaC + license scan over the source tree, at merge time |
-| Image scan | `pipeline.yml` (job `gate-image`) — Trivy image scan, publish-gated (dormant in template state) |
-| Image attestation | `pipeline.yml` (job `attest-container-scan`) — binds the image scan verdict to the image digest as a `container-scan/v1` attestation |
-| Integration | GitHub Security tab (SARIF upload) |
+| Caller workflow | Job ID | Job name | Scan target | Gated by |
+| --- | --- | --- | --- | --- |
+| `.github/workflows/quality-gates.yml` | `trivy` | (unnamed) | Filesystem (source tree: Dockerfile, manifests, licenses) | Always runs (see Triggers) |
+| `.github/workflows/pipeline.yml` | `gate-image` | Gate — Trivy (image) | Built container image, by digest | `needs: [docker]`; `docker` itself gated on `publishable == 'true'` |
+| `.github/workflows/pipeline.yml` | `attest-container-scan` | Attest — Container scan | Signs the `gate-image` verdict | `needs: [docker, gate-image]` |
 
-### What it scans for
+## Triggers
 
-Trivy scans Docker images for:
+The `quality-gates.yml` filesystem scan inherits that workflow's top-level triggers:
 
-- OS package vulnerabilities (CVEs)
-- Application dependency vulnerabilities
-- Misconfigurations
-- Secrets in image layers
+| Event | Condition |
+| --- | --- |
+| `push` | Branch `main` |
+| `pull_request` | Target branch `main` |
+| `schedule` | `0 6 * * 1` (Monday 06:00 UTC) |
+| `workflow_dispatch` | Manual |
+
+The `gate-image`/`attest-container-scan` jobs in `pipeline.yml` are event-driven
+(not scheduled): they run when `github.event_name != 'pull_request'` and,
+for `workflow_dispatch`, only when `inputs.stage` is `all` or `docker`. They
+additionally require `needs.gate.outputs.publishable == 'true'`, which reads
+`publish` from each workspace crate's `Cargo.toml`.
+
+## Reusable workflow invocations
+
+| Job | Reusable | Pin | `with:` |
+| --- | --- | --- | --- |
+| `trivy` (quality-gates.yml) | `reusable-trivy.yml` | `e50b004cbdcf2b3258d223b1f6a4d98ff7938abf` | `scan-iac: true` (no `image-ref`; filesystem mode) |
+| `gate-image` (pipeline.yml) | `reusable-trivy.yml` | `e50b004cbdcf2b3258d223b1f6a4d98ff7938abf` | `image-ref: ghcr.io/${{ github.repository }}@${{ needs.docker.outputs.image-digest }}`, `scan-iac: false` |
+| `attest-container-scan` (pipeline.yml) | `reusable-attest-scan.yml` | `e50b004cbdcf2b3258d223b1f6a4d98ff7938abf` | `subject-name: ghcr.io/${{ github.repository }}`, `subject-digest: ${{ needs.docker.outputs.image-digest }}`, `predicate-type: https://modeled-information-format.github.io/attestations/container-scan/v1` |
+
+## Permissions
+
+| Job | `contents` | `security-events` | `actions` | `packages` | `id-token` | `attestations` |
+| --- | --- | --- | --- | --- | --- | --- |
+| `trivy` | `read` | `write` | `read` | `read` | — | — |
+| `gate-image` | `read` | `write` | `read` | `read` | — | — |
+| `attest-container-scan` | `read` | — | — | — | `write` | `write` |
+
+## What it scans for
+
+| Category | Coverage |
+| --- | --- |
+| OS package vulnerabilities | CVEs in image base-layer packages |
+| Application dependencies | Vulnerabilities in bundled application dependencies |
+| Misconfigurations | Dockerfile/IaC misconfiguration rules (filesystem scan, `scan-iac: true`) |
+| Secrets | Secrets embedded in image layers |
 
 Severity levels: `CRITICAL`, `HIGH`, `MEDIUM`, `LOW`, `UNKNOWN`.
 
-### CI pipeline stages
+## Current repository state
 
-Two Trivy lanes run through the central reusable workflow:
+`docker`, `gate-image`, and `attest-container-scan` are gated on
+`needs.gate.outputs.publishable == 'true'`. As of this writing, `mif-core`,
+`mif-schema`, and `mif-ontology` each declare `publish = false` in their
+`Cargo.toml`, so `gate` resolves `publishable = false` and the image-scan and
+attestation chain does not run. The filesystem scan (`trivy` job in
+`quality-gates.yml`) is unaffected by this gate and runs unconditionally on
+its own triggers.
 
-1. **Filesystem (merge-time)** — `quality-gates.yml` scans the source tree (Dockerfile, manifests, licenses) and uploads SARIF to GitHub Security.
-2. **Image (publish-gated)** — once the container build is armed (`publish = false` deleted), `pipeline.yml`'s `gate-image` job runs a Trivy image scan against the built image digest. The `attest-container-scan` job then signs the scan result and binds it to the image digest as a `container-scan/v1` attestation.
+## Outputs (SARIF)
 
-Filesystem findings appear in **Security tab → Code scanning alerts**. Image scan findings become a signed `container-scan/v1` attestation on the image (verifiable with `gh attestation verify`).
-
-### SARIF output (GitHub Security)
+Filesystem findings upload to **Security tab → Code scanning alerts**. Image
+scan findings become the `gate-image.outputs.image-sarif-artifact` /
+`image-sarif-filename` pair, consumed by `attest-container-scan` and signed as
+a `container-scan/v1` attestation bound to the image digest — verifiable with
+`gh attestation verify`.
 
 ```json
 {
@@ -44,161 +128,26 @@ Filesystem findings appear in **Security tab → Code scanning alerts**. Image s
     {
       "ruleId": "CVE-2021-12345",
       "level": "error",
-      "message": {
-        "text": "openssl: buffer overflow vulnerability"
-      },
-      "locations": [{
-        "physicalLocation": {
-          "artifactLocation": {
-            "uri": "Dockerfile"
-          }
-        }
-      }]
+      "message": { "text": "openssl: buffer overflow vulnerability" },
+      "locations": [
+        { "physicalLocation": { "artifactLocation": { "uri": "Dockerfile" } } }
+      ]
     }
   ]
 }
 ```
 
-### Table output
+## Examples
 
-```text
-Library      Vulnerability  Severity  Status  Installed  Fixed
--------      -------------  --------  ------  ---------  -----
-openssl      CVE-2021-12345 CRITICAL  fixed   1.1.1k     1.1.1l
-```
-
-### Scheduled scans
-
-The filesystem gate in `quality-gates.yml` re-runs weekly on a schedule, so a previously clean tree is re-checked against newly disclosed CVEs:
-
-```yaml
-schedule:
-  - cron: "0 6 * * 1"  # Every Monday at 06:00 UTC
-```
-
-The image scan in `pipeline.yml` is event-driven (on push/tag once publishing is armed), not scheduled.
-
-## How-to
-
-### Scan locally
+Reproduce the filesystem scan locally:
 
 ```bash
-# Install Trivy
-brew install trivy
-# or
-curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+trivy fs --scanners vuln,misconfig,secret .
+```
 
-# Build and scan image
+Reproduce the image scan locally, against a locally built image:
+
+```bash
 docker build -t mif-rs:local .
 trivy image mif-rs:local
-
-# Scan a specific severity
-trivy image --severity HIGH,CRITICAL mif-rs:local
-
-# Output formats
-trivy image --format json mif-rs:local > scan.json
-trivy image --format sarif mif-rs:local > scan.sarif
 ```
-
-Verify: `trivy image mif-rs:local` prints a vulnerability table.
-
-### Configure the severity threshold
-
-Trivy behaviour is configured in the central reusable workflow (`modeled-information-format/.github`), not in this repo. To adjust severity for a local scan:
-
-```bash
-trivy image --severity CRITICAL,HIGH mif-rs:local
-```
-
-Verify: confirm only the selected severities are reported.
-
-### Ignore unfixed vulnerabilities
-
-For a local scan, drop vulnerabilities that have no available fix:
-
-```bash
-trivy image --ignore-unfixed mif-rs:local
-```
-
-Verify: vulnerabilities with no available fix no longer appear.
-
-### Suppress specific findings
-
-Create `.trivyignore`:
-
-```text
-# Ignore specific CVEs
-CVE-2021-12345
-
-# Ignore by package
-pkg:deb/debian/openssl@1.1.1
-```
-
-Verify: `trivy image mif-rs:local` no longer lists the ignored entries.
-
-### Remediate a finding
-
-1. **Update the base image** (pin by digest for immutability):
-
-   ```dockerfile
-   # Before
-   FROM rust:1.92-slim
-
-   # After (with digest for immutability)
-   FROM rust:1.92-slim@sha256:abc123...
-   ```
-
-2. **Update dependencies and rebuild**:
-
-   ```bash
-   cargo update
-   cargo audit
-   docker build -t mif-rs:patched .
-   trivy image mif-rs:patched
-   ```
-
-3. **Accept a documented risk** (false positive or mitigated):
-
-   ```text
-   # .trivyignore
-   CVE-2021-12345  # Mitigated by network isolation
-   ```
-
-Verify: re-scan the rebuilt image and confirm the finding is resolved or suppressed.
-
-### Troubleshooting
-
-**Scan failures**:
-
-```bash
-trivy image --download-db-only
-trivy image --clear-cache
-```
-
-**False positives** — inspect the finding, then suppress if confirmed:
-
-```bash
-trivy image --format json mif-rs:local | jq '.Results[].Vulnerabilities[] | select(.VulnerabilityID=="CVE-2021-12345")'
-```
-
-**Slow scans**:
-
-```bash
-# Scan only critical/high
-trivy image --severity CRITICAL,HIGH mif-rs:local
-
-# Skip DB download (use cache)
-trivy image --skip-db-update mif-rs:local
-```
-
-## Why this matters
-
-A vulnerable dependency or base image is a vulnerability in the shipped artifact, even when the application source is clean. Scanning the built image — not just `Cargo.lock` — catches OS-level CVEs, misconfigurations, and leaked secrets that source-level audits miss. Surfacing the filesystem findings as SARIF in the GitHub Security tab puts them where reviewers already work and gives each one a tracked lifecycle, while the image scan verdict is signed and bound to the image digest as a verifiable attestation. The weekly filesystem schedule re-checks the source against newly disclosed CVEs so a previously clean tree doesn't silently age into a vulnerable one.
-
-## Links
-
-- [Trivy Documentation](https://aquasecurity.github.io/trivy/)
-- [Configuration Reference](https://aquasecurity.github.io/trivy/latest/docs/configuration/)
-- [CVE Database](https://cve.mitre.org/)
-- [GitHub Security Advisories](https://github.com/advisories)
-- [CI Workflows reference](../template/CI-WORKFLOWS.md)

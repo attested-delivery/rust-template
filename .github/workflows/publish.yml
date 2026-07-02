@@ -6,10 +6,9 @@ name: Publish to crates.io
 #
 # One-time setup per crate: crates.io -> crate Settings -> Trusted
 # Publishing -> add this GitHub repo, workflow `publish.yml`,
-# environment `copilot`.
-#
-# The crate name is resolved at runtime from Cargo.toml — nothing to
-# rename in this file when the template is instantiated.
+# environment `release`. This workspace publishes 5 crates independently
+# (mif-core, mif-schema, mif-ontology, mif-cli, mif-mcp) — repeat the
+# Trusted Publishing linkage once per crate.
 
 "on":
   push:
@@ -58,7 +57,7 @@ jobs:
     needs: [guard]
     if: needs.guard.outputs.publishable == 'true'
     runs-on: ubuntu-latest
-    environment: copilot
+    environment: release
     permissions:
       contents: read
       # OIDC for crates.io Trusted Publishing and .crate attestation signing

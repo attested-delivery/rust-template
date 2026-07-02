@@ -95,3 +95,75 @@ fn resolve(id: &str, ontologies_dir: &Path) -> Result<(), String> {
     }
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use std::fs;
+
+    use super::{resolve, validate};
+
+    fn write_temp_file(contents: &str) -> tempfile::NamedTempFile {
+        let file = tempfile::NamedTempFile::new().unwrap();
+        fs::write(file.path(), contents).unwrap();
+        file
+    }
+
+    #[test]
+    fn validate_accepts_a_conformant_document() {
+        let file = write_temp_file(
+            r#"{
+                "@context": "https://mif-spec.dev/schema/context.jsonld",
+                "@type": "Concept",
+                "@id": "urn:mif:memory:test-001",
+                "conceptType": "semantic",
+                "content": "Test content.",
+                "created": "2026-07-02T00:00:00Z"
+            }"#,
+        );
+        assert!(validate(file.path()).is_ok());
+    }
+
+    #[test]
+    fn validate_rejects_a_non_conformant_document() {
+        let file = write_temp_file(r#"{"content": "missing required fields"}"#);
+        let error = validate(file.path()).unwrap_err();
+        assert!(error.contains("failed schema validation"));
+    }
+
+    #[test]
+    fn validate_reports_invalid_json() {
+        let file = write_temp_file("not json");
+        let error = validate(file.path()).unwrap_err();
+        assert!(error.contains("failed to parse"));
+    }
+
+    #[test]
+    fn validate_reports_missing_file() {
+        let missing = std::path::Path::new("/nonexistent/mif-cli-test-fixture.json");
+        let error = validate(missing).unwrap_err();
+        assert!(error.contains("failed to read"));
+    }
+
+    #[test]
+    fn resolve_prints_the_extends_chain() {
+        let dir = tempfile::tempdir().unwrap();
+        fs::write(
+            dir.path().join("mif-base.yaml"),
+            "ontology:\n  id: mif-base\n  version: 1.0.0\n",
+        )
+        .unwrap();
+        fs::write(
+            dir.path().join("domain.yaml"),
+            "ontology:\n  id: domain\n  version: 1.0.0\n  extends: [mif-base]\n",
+        )
+        .unwrap();
+        assert!(resolve("domain", dir.path()).is_ok());
+    }
+
+    #[test]
+    fn resolve_reports_unknown_ontology() {
+        let dir = tempfile::tempdir().unwrap();
+        let error = resolve("missing", dir.path()).unwrap_err();
+        assert!(error.contains("not found"));
+    }
+}
