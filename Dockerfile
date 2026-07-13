@@ -3,7 +3,7 @@
 # The :tag is kept alongside the digest for human readability; Dependabot's
 # docker ecosystem keeps the digest fresh. Refresh with:
 #   docker buildx imagetools inspect <image> --format '{{.Manifest.Digest}}'
-FROM rust:1.96-slim@sha256:c37af730be4fd8104cbf9aedbd6ab259e51ca2d5437817a0f8680edf66ac6c28 AS builder
+FROM rust:1.97-slim@sha256:14c4fe50ea427dc42381a1a09a9a839c1d2346a2e508cd491bf02c659dbc0ed7 AS builder
 
 WORKDIR /app
 
