@@ -358,20 +358,14 @@ To customize the dev container, edit `.devcontainer/devcontainer.json`. Common c
 
 The template includes configuration files for multiple AI coding assistants.
 
-### CLAUDE.md
+### AGENTS.md
 
-Instructions for [Claude Code](https://docs.anthropic.com/en/docs/claude-code). Located at the repo root.
+Instructions for [GitHub Copilot coding agent](https://docs.github.com/en/copilot/using-github-copilot/using-copilot-coding-agent) and [Claude Code](https://docs.anthropic.com/en/docs/claude-code). Located at the repo root.
 
 - Build commands, project structure, and code style rules
 - Error handling patterns and documentation requirements
 - Testing conventions and CI/CD pipeline details
-
-### AGENTS.md
-
-Instructions for [GitHub Copilot coding agent](https://docs.github.com/en/copilot/using-github-copilot/using-copilot-coding-agent). Located at the repo root.
-
-- Read by the Copilot coding agent when it works on issues and PRs
-- Shares the same project conventions as `CLAUDE.md`
+- Read by the Copilot coding agent when it works on issues and PRs, and by Claude Code
 
 ### .github/copilot-instructions.md
 
@@ -401,7 +395,7 @@ Instructions for [GitHub Copilot Chat](https://docs.github.com/en/copilot/custom
 
 ### Customizing AI Instructions
 
-- Edit `CLAUDE.md` and `AGENTS.md` at the repo root to update project-wide conventions.
+- Edit `AGENTS.md` at the repo root to update project-wide conventions.
 - Add new `.instructions.md` files under `.github/instructions/` for path-specific rules.
 - Add new `.prompt.md` files under `.github/prompts/` for reusable task prompts.
 - All AI instruction files are regular Markdown -- placeholder replacement applies to them automatically.
