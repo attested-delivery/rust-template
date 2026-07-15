@@ -256,7 +256,7 @@ the same style as `add` — copying a known-good shape is the safest way to make
 change that passes every gate on the first try.
 
 > Want the full design rationale (why `thiserror`, why consuming builders, why
-> the strict lints)? It lives in the project's `CLAUDE.md` under
+> the strict lints)? It lives in the project's `AGENTS.md` under
 > **Explanation**. For now, you know enough to make your first change.
 
 ---
@@ -506,6 +506,6 @@ You now have everything you need to build something real.
 | See what copies when you "Use this template" | [GitHub Template Features](../template/GITHUB-TEMPLATE-FEATURES.md) (reference) |
 | Fix a failing CI check | [CI Troubleshooting](../runbooks/CI-TROUBLESHOOTING.md) (how-to) |
 | Cut and verify a release | [Releasing](../runbooks/RELEASING.md) (how-to) |
-| Understand the design rationale (why `thiserror`, `crates/`, strict lints) | `CLAUDE.md` → Explanation |
+| Understand the design rationale (why `thiserror`, `crates/`, strict lints) | `AGENTS.md` → Explanation |
 
 Happy building. 🦀

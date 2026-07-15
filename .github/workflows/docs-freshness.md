@@ -46,7 +46,7 @@ This repository has an Astro Starlight documentation site in `site/` that genera
 
 1. **Docs pages** — markdown files in `docs/` are converted to Starlight MDX pages via `site/scripts/generate-docs-pages.mjs`
 2. **Workflow reference pages** — `.github/workflows/*.yml` files are parsed into reference pages via `site/scripts/generate-workflow-pages.mjs`
-3. **Reference pages** — sections from `CLAUDE.md` are extracted into individual reference pages via `site/scripts/generate-reference-pages.mjs`
+3. **Reference pages** — sections from `AGENTS.md` are extracted into individual reference pages via `site/scripts/generate-reference-pages.mjs`
 
 The generated content lives in `site/src/content/docs/` and must stay in sync with these sources.
 

@@ -109,7 +109,7 @@ lint groups. Key rules:
 - **Use `const fn`** where possible
 - **Line length**: 100 characters maximum
 
-See [CLAUDE.md](CLAUDE.md) for detailed coding patterns and examples.
+See [AGENTS.md](AGENTS.md) for detailed coding patterns and examples.
 
 ## Operational Runbooks
 
@@ -124,5 +124,5 @@ For ongoing project operations, see the runbooks in [`docs/runbooks/`](docs/runb
 
 AI-assisted contributions are welcome. If using AI tools, please ensure
 generated code follows the same quality standards as hand-written code.
-See `CLAUDE.md` and `.github/copilot-instructions.md` for AI-specific
+See `AGENTS.md` and `.github/copilot-instructions.md` for AI-specific
 guidelines.

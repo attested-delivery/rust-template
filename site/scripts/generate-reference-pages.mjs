@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Extracts reference sections from the project root CLAUDE.md
+ * Extracts reference sections from the project root AGENTS.md
  * and generates individual Starlight MDX pages.
  */
 
@@ -14,7 +14,7 @@ const projectRoot = resolve(__dirname, "..", "..");
 const siteRoot = resolve(__dirname, "..");
 
 /**
- * Sections to extract from CLAUDE.md.
+ * Sections to extract from AGENTS.md.
  * heading: the ### heading text to match
  * output: output filename under reference/
  * title: page title
@@ -107,13 +107,13 @@ function extractSection(content, heading) {
 }
 
 /**
- * Generate reference pages from CLAUDE.md sections.
+ * Generate reference pages from AGENTS.md sections.
  * @param {string} [outputBase] - Override output base directory
  * @returns {{ generated: string[], skipped: string[] }}
  */
 export function generateReferencePages(outputBase) {
-    const claudeMdPath = join(projectRoot, "CLAUDE.md");
-    const content = readFileSync(claudeMdPath, "utf-8");
+    const agentsMdPath = join(projectRoot, "AGENTS.md");
+    const content = readFileSync(agentsMdPath, "utf-8");
     const outDir = outputBase || join(siteRoot, "src", "content", "docs");
     const generated = [];
     const skipped = [];
@@ -146,7 +146,7 @@ export function generateReferencePages(outputBase) {
 
 // Run directly
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-    console.log("Generating reference pages from CLAUDE.md...");
+    console.log("Generating reference pages from AGENTS.md...");
     const { generated, skipped } = generateReferencePages();
     console.log(`\nDone: ${generated.length} generated, ${skipped.length} skipped.`);
 }

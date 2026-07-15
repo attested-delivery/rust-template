@@ -12,7 +12,7 @@ name: Deploy Documentation
     paths:
       - 'docs/**'
       - 'site/**'
-      - 'CLAUDE.md'
+      - 'AGENTS.md'
       - 'Cargo.toml'
   workflow_dispatch:
 
