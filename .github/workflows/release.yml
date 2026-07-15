@@ -364,7 +364,7 @@ jobs:
       pull-requests: write   # reusable's (skipped) dependency-review job declares it
     # attested-delivery/.github main @ ca91728 (2026-06-23)
     uses: >-
-      attested-delivery/.github/.github/workflows/reusable-sca-osv.yml@ca91728c87beb08742325b4ed4d06fcfb261435b
+      attested-delivery/.github/.github/workflows/reusable-sca-osv.yml@ee1f93b566abc109efa0588d3d5308b4dd4a7492
     with:
       fail-on-severity: high
       scan-args: |-
