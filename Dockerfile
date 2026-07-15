@@ -35,7 +35,7 @@ RUN cargo build --release
 # Runtime stage - use distroless for minimal attack surface.
 # Pinned by digest (no :latest) to satisfy Scorecard Pinned-Dependencies and
 # Trivy DS-0001; Dependabot's docker ecosystem keeps the digest fresh.
-FROM gcr.io/distroless/cc-debian12@sha256:d703b626ba455c4e6c6fbe5f36e6f427c85d51445598d564652a2f334179f96e
+FROM gcr.io/distroless/cc-debian12@sha256:7ee09f36862efbdbf70422db263e411c2618409ca46faa555bd5b636155307df
 
 # Copy binary from builder
 COPY --from=builder /app/target/release/rust_template /usr/local/bin/rust_template
