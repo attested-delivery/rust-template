@@ -98,7 +98,7 @@ jobs:
       contents: read
     # attested-delivery/.github main @ ca91728 (2026-06-23)
     uses: >-
-      attested-delivery/.github/.github/workflows/reusable-zap.yml@ca91728c87beb08742325b4ed4d06fcfb261435b
+      attested-delivery/.github/.github/workflows/reusable-zap.yml@ee1f93b566abc109efa0588d3d5308b4dd4a7492
     with:
       target: ${{ inputs.target }}
       fail-action: false
