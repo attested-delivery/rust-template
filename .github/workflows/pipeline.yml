@@ -116,7 +116,7 @@ jobs:
       contents: read
     # attested-delivery/.github main @ ca91728 (2026-06-23)
     uses: >-
-      attested-delivery/.github/.github/workflows/pin-check.yml@ee1f93b566abc109efa0588d3d5308b4dd4a7492
+      attested-delivery/.github/.github/workflows/pin-check.yml@78f1933ef020e3d94af848a191297d26e8dc8b4c
 
   # -----------------------------------------------------------
   # Docker — after CI; PR = build-only, push on main/tags
