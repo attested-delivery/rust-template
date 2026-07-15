@@ -228,7 +228,7 @@ jobs:
       contents: read
     # attested-delivery/.github main @ ca91728 (2026-06-23)
     uses: >-
-      attested-delivery/.github/.github/workflows/reusable-attest-scan.yml@ca91728c87beb08742325b4ed4d06fcfb261435b
+      attested-delivery/.github/.github/workflows/reusable-attest-scan.yml@78f1933ef020e3d94af848a191297d26e8dc8b4c
     with:
       subject-name: ghcr.io/${{ github.repository }}
       subject-digest: ${{ needs.docker.outputs.image-digest }}
