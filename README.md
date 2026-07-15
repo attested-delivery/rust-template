@@ -146,7 +146,6 @@ Cargo.toml           # Project manifest
 clippy.toml          # Clippy configuration
 rustfmt.toml         # Formatter configuration
 deny.toml            # cargo-deny configuration
-CLAUDE.md            # AI assistant instructions
 AGENTS.md            # AI coding agent instructions
 .editorconfig        # Cross-editor defaults
 .devcontainer/       # Codespaces / dev container config
@@ -229,7 +228,7 @@ Verification commands for every artifact type live in [SECURITY.md](SECURITY.md#
 ### AI Coding Agent
 
 - **Copilot Setup** (`.github/workflows/copilot-setup-steps.yml`) - Environment for GitHub Copilot coding agent
-- **Agent Instructions**: `AGENTS.md`, `.github/copilot-instructions.md`, `CLAUDE.md`
+- **Agent Instructions**: `AGENTS.md`, `.github/copilot-instructions.md`
 - **Path-Specific Instructions**: `.github/instructions/` for Rust code and test patterns
 - **Reusable Prompts**: `.github/prompts/` for common development tasks
 
